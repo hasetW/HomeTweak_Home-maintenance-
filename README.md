@@ -14,7 +14,7 @@ HomeTweak--Home-Maintenance-and-Repair-App-2025
 ## Features  
 
 ### Description
-HomeFix is an app designed to connect homeowners with trusted professionals for various home maintenance and repair services. It enables users to book services, while service providers can list and manage their offerings.
+HomeTweak is an app designed to connect homeowners with trusted professionals for various home maintenance and repair services. It enables users to book services, while service providers can list and manage their offerings.
 
 ### User Signup
 - **Actors**: New User
