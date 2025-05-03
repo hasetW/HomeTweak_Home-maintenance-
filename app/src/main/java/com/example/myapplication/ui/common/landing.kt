@@ -77,7 +77,7 @@ fun LandingPage() {
                 .clip(RoundedCornerShape(100.dp))
         )
 
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = {},
