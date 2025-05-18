@@ -1,4 +1,4 @@
-//package com.example.myapplication.ui.common
+package com.example.myapplication.ui.common//package com.example.myapplication.ui.common
 //
 //import androidx.compose.foundation.Image
 //import androidx.compose.foundation.background

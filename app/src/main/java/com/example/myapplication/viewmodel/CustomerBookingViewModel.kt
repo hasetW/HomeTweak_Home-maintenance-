@@ -1,10 +1,11 @@
-package com.example.myapplication.viewmodels
+package com.example.myapplication.viewmodel//package com.example.myapplication.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.model.Booking
 import com.example.myapplication.data.model.BookingStatus
 import com.example.myapplication.data.repository.BookingRepository
+import com.example.myapplication.data.model.BookingStatusUpdateRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -15,7 +16,8 @@ class CustomerBookingViewModel(
     private val customerId: Int // This should come from login session or token decoding
 ) : ViewModel() {
 
-    private val _currentTab = MutableStateFlow(BookingStatus.ACTIVE)
+    private val _currentTab = MutableStateFlow(BookingStatus.PENDING)
+
     val currentTab: StateFlow<BookingStatus> = _currentTab
 
     private val _allBookings = MutableStateFlow<List<Booking>>(emptyList())
@@ -30,11 +32,13 @@ class CustomerBookingViewModel(
         _currentTab.value = status
         filterBookingsByStatus(status)
     }
-
     fun cancelBooking(bookingId: Int) {
         viewModelScope.launch {
             val response = bookingRepository
-                .updateBookingStatus(bookingId, BookingStatus.DECLINED)
+                .updateBookingStatus(
+                    bookingId,
+                    BookingStatusUpdateRequest("Declined")
+                )
                 .awaitResponse()
 
             if (response.isSuccessful) {

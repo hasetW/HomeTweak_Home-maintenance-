@@ -3,7 +3,7 @@ package com.example.myapplication.data.model
 data class Provider(
     val id: Int,
     val userId: Int,
-    val categoryId: Int,
+    val category: String,
     val certificate: String?,
     val location: String?,
     val imageUrl: String?,
@@ -12,5 +12,5 @@ data class Provider(
     val yearsOfExperience: Int,
     val rating: Float?,
     val serviceType: String?,
-    val name:String
+    val username: String,
 )

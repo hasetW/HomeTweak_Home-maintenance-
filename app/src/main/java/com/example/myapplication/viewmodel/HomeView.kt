@@ -3,33 +3,52 @@ package com.example.myapplication.viewmodel
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.myapplication.data.model.Booking
 import com.example.myapplication.data.model.Provider
-import com.example.myapplication.data.model.Category // Import Category model
+import com.example.myapplication.data.model.Category
+import com.example.myapplication.data.repository.BookingRepository
 import com.example.myapplication.data.repository.ProviderRepository
-import com.example.myapplication.data.repository.CategoryRepository // Import CategoryRepository
+import com.example.myapplication.data.repository.CategoryRepository
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class HomePageViewModel(
     private val providerRepository: ProviderRepository,
-    private val categoryRepository: CategoryRepository // Add CategoryRepository to fetch categories
+    private val categoryRepository: CategoryRepository,
+    private val bookingRepository: BookingRepository
 ) : ViewModel() {
 
-    // Holds the filtered list of providers
     var filteredProviders = mutableStateOf<List<Provider>>(emptyList())
         private set
 
-    // Holds the list of categories
     var categories = mutableStateOf<List<Category>>(emptyList())
         private set
 
-    // Fetch all categories
+    var bookingSuccess = mutableStateOf(false)
+    var bookingError = mutableStateOf<String?>(null)
+
+
+    fun createBooking(booking: Booking) {
+        bookingRepository.createBooking(booking).enqueue(object : Callback<Booking> {
+            override fun onResponse(call: Call<Booking>, response: Response<Booking>) {
+                if (response.isSuccessful) {
+                    Log.d("BookingSuccess", "Booking created: ${response.body()}")
+                } else {
+                    Log.e("BookingError", "Error: ${response.code()}, ${response.errorBody()?.string()}")
+                }
+            }
+            override fun onFailure(call: Call<Booking>, t: Throwable) {
+                Log.e("BookingFailure", "Failure: ${t.message}")
+            }
+        })
+    }
+
+
     fun getAllCategories() {
         categoryRepository.getCategories().enqueue(object : Callback<List<Category>> {
             override fun onResponse(call: Call<List<Category>>, response: Response<List<Category>>) {
                 if (response.isSuccessful) {
-                    Log.d("CategorySuccess", "Categories: ${response.body()}")
                     categories.value = response.body() ?: emptyList()
                 } else {
                     Log.e("CategoryError", "Response error: ${response.errorBody()?.string()}")
@@ -42,12 +61,10 @@ class HomePageViewModel(
         })
     }
 
-    // Function to fetch all providers from the repository
     fun getAllProviders() {
         providerRepository.getAllProviders().enqueue(object : Callback<List<Provider>> {
             override fun onResponse(call: Call<List<Provider>>, response: Response<List<Provider>>) {
                 if (response.isSuccessful) {
-                    Log.d("ProviderSuccess", "Providers: ${response.body()}")
                     filteredProviders.value = response.body() ?: emptyList()
                 } else {
                     Log.e("ProviderError", "Response error: ${response.errorBody()?.string()}")
@@ -60,15 +77,13 @@ class HomePageViewModel(
         })
     }
 
-    // Function to fetch providers by category
     fun filterByCategory(categoryId: Int) {
         if (categoryId == 0) {
-            getAllProviders() // Show all providers
+            getAllProviders()
         } else {
             providerRepository.getProvidersByCategory(categoryId).enqueue(object : Callback<List<Provider>> {
                 override fun onResponse(call: Call<List<Provider>>, response: Response<List<Provider>>) {
                     if (response.isSuccessful) {
-                        Log.d("ProviderSuccess", "Providers: ${response.body()}")
                         filteredProviders.value = response.body() ?: emptyList()
                     } else {
                         Log.e("ProviderError", "Response error: ${response.errorBody()?.string()}")
@@ -82,7 +97,6 @@ class HomePageViewModel(
         }
     }
 
-    // Function to get category name by categoryId
     fun getCategoryNameById(categoryId: Int): String {
         return categories.value.firstOrNull { it.id == categoryId }?.name ?: "Unknown"
     }

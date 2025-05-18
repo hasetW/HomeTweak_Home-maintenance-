@@ -1,7 +1,7 @@
 package com.example.myapplication.data.remote
 
 import com.example.myapplication.data.model.Booking
-import com.example.myapplication.data.model.BookingStatus
+import com.example.myapplication.data.model.BookingStatusUpdateRequest
 
 import retrofit2.Call
 import retrofit2.http.Body
@@ -21,11 +21,14 @@ interface BookingService {
     @GET("bookings/provider/{providerId}")
     fun getBookingsByProviderId(@Path("providerId") providerId: Int): Call<List<Booking>>
 
-    @PUT("bookings/{id}")
+    @PUT("bookings/{id}/status")
     fun updateBookingStatus(
         @Path("id") bookingId: Int,
-        @Body statusRequest: BookingStatus
+        @Body statusRequest: BookingStatusUpdateRequest
     ): Call<Booking>
+
+
+
     @GET("bookings/{id}")
     fun getBookingById(@Path("id") bookingId: Int): Call<Booking>
 }

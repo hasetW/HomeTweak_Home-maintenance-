@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -20,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.ui.theme.CardColor
 import com.example.myapplication.ui.theme.DarkBlue
@@ -27,7 +30,12 @@ import com.example.myapplication.ui.theme.MutedGrey
 import com.example.myapplication.ui.theme.OffWhite
 import com.example.myapplication.ui.theme.SafetyOrange
 import com.example.myapplication.viewmodel.HomePageViewModel
-import   com.example.myapplication.data.model.Provider
+import com.example.myapplication.data.model.Provider
+import coil.compose.rememberAsyncImagePainter
+import com.example.myapplication.data.model.Booking
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class Category(val name: String, val img: Int, val id: Int)
 
@@ -44,10 +52,8 @@ fun HomePage(viewModel: HomePageViewModel) {
         Category("Gardner", R.drawable.gardner, 6)
     )
 
-    // Directly observe filteredProviders in the composable
     val filteredProviders = viewModel.filteredProviders.value
 
-    // Fetch providers on first load
     LaunchedEffect(Unit) {
         viewModel.getAllProviders()
     }
@@ -87,36 +93,36 @@ fun HomePage(viewModel: HomePageViewModel) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
-                text = "Categories",
-                color = DarkBlue,
-                style = MaterialTheme.typography.displayLarge
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                items(categoryList) { category ->
-                    CustomLazyCard(category = category, onClick = {
-                        viewModel.filterByCategory(category.id)
-                    })
-                }
-            }
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            Text(
-                text = "Top Rated",
-                style = MaterialTheme.typography.displayLarge,
-                color = DarkBlue
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(15.dp),
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
+                item {
+                    Text(
+                        text = "Categories",
+                        color = DarkBlue,
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                }
+
+                item {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                        items(categoryList) { category ->
+                            CustomLazyCard(category = category, onClick = {
+                                viewModel.filterByCategory(category.id)
+                            })
+                        }
+                    }
+                }
+
+                item {
+                    Text(
+                        text = "Top Rated",
+                        style = MaterialTheme.typography.displayLarge,
+                        color = DarkBlue
+                    )
+                }
+
                 items(filteredProviders) { provider ->
                     LazyColumnCard(provider = provider, viewModel = viewModel)
                 }
@@ -127,48 +133,115 @@ fun HomePage(viewModel: HomePageViewModel) {
 
 @Composable
 fun LazyColumnCard(provider: Provider, viewModel: HomePageViewModel) {
-    // Fetch category name by categoryId
-    val categoryName = viewModel.getCategoryNameById(provider.categoryId)
+    var expanded by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .wrapContentHeight()
             .clip(RoundedCornerShape(16.dp)),
         colors = CardDefaults.cardColors(CardColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.painter),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(RoundedCornerShape(50.dp))
-            )
-            Column {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                    ProviderImage(provider.imageUrl)
+
+                    Column {
+                        Text(
+                            text = " ${provider.username} ",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = DarkBlue
+                        )
+
+                        Text(
+                            text = " ${provider.category}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MutedGrey
+                        )
+                        Text(
+                            text = "Rating: ${provider.rating}/5",
+                            color = DarkBlue
+                        )
+                    }
+                }
+
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = SafetyOrange,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { expanded = !expanded }
+                )
+            }
+
+            if (expanded) {
+                Spacer(modifier = Modifier.height(10.dp))
+
                 Text(
-                    text = provider.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = DarkBlue
+                    text = "Years of Experience: ${provider.yearsOfExperience} Years",
+                    color = MutedGrey,
+                    fontSize = 16.sp
                 )
                 Text(
-                    text = categoryName, // Use the category name here
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MutedGrey
+                    text = "Phone No: ${provider.phoneNumber}",
+                    color = MutedGrey,
+                    fontSize = 16.sp
                 )
                 Text(
-                    text = "Rating: ${provider.rating}/5",
-                    color = DarkBlue
+                    text = "Price: \$${provider.hourlyRate}/hr",
+                    color = DarkBlue,
+                    fontSize = 16.sp
                 )
+                Text(
+                    text = "Location: ${provider.location}",
+                    color = DarkBlue,
+                    fontSize = 16.sp
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
+                    Button(
+                        onClick = {
+                            val currentDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).format(Date())
+
+                            val booking = Booking(
+                                userId = 1, // replace with actual userId
+                                providerId = provider.id,
+                                serviceDate = currentDate,
+                                bookingDate = currentDate,
+                                status = "PENDING"
+                            )
+
+
+                            viewModel.createBooking(booking)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = SafetyOrange,
+                            contentColor = OffWhite,
+                        )
+                    ) {
+                        Text("Book")
+                    }
+
+
+                    Button(onClick = { expanded = false },
+                        colors = ButtonDefaults.buttonColors(MutedGrey)
+                    ) {
+                        Text(text = "Cancel")
+                    }
+                }
             }
         }
     }
 }
-
 
 @Composable
 fun CustomLazyCard(category: Category, onClick: () -> Unit) {
@@ -204,4 +277,20 @@ fun CustomLazyCard(category: Category, onClick: () -> Unit) {
         }
     }
 }
+
+@Composable
+fun ProviderImage(imageUrl: String?) {
+    Image(
+        painter = if (!imageUrl.isNullOrBlank()) {
+            rememberAsyncImagePainter(model = imageUrl)
+        } else {
+            painterResource(R.drawable.gardner)
+        },
+        contentDescription = "Provider Image",
+        modifier = Modifier
+            .size(50.dp)
+            .clip(RoundedCornerShape(50.dp))
+    )
+}
+
 

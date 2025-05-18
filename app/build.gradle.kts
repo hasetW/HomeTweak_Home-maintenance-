@@ -64,5 +64,8 @@ dependencies {
     implementation(libs.lifecycle.livedata)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.okhttp)
+    implementation(libs.coil.compose)
+
+
 
 }

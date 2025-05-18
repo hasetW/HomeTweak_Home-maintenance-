@@ -1,4 +1,4 @@
-//package com.example.myapplication.ui.common
+package com.example.myapplication.ui.common//package com.example.myapplication.ui.common
 //
 //import android.widget.Toast
 //import androidx.compose.foundation.Image
