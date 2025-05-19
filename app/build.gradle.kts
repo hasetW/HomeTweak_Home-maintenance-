@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.okhttp)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.navigation.compose)
 
 
 
